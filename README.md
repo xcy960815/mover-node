@@ -23,4 +23,5 @@ new Vue({
 ## 注意事项：
 
 1. 参数一共四个：topNodeClass、bottomNodeClass、leftNodeClass、rightNodeClass 分别对应上面节点的 className、下面节点的 className、左面节点的 className、右面节点的 className。
-2. 参数两两配对使用，若是一个节点上面四个参数都有，上下节点的 className 优先级高于左右节点 className]
+2. 参数两两配对使用，若是一个节点上面四个参数都有，上下节点的 className 优先级高于左右节点 className
+3. 具体的内容可看源码 src->mover-node.vue
