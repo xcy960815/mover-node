@@ -25,12 +25,20 @@
 </body>
 <script lang="ts">
 
-    Vue.use(demo)
+    Vue.use(moverNode)
     new Vue({
         el: '#app',
         template: `<div id="app">
-                    <demo></demo>
-                    </div>`,
+                    <div class="top" style="height:100px;background:red;"></div>
+                    <mover-node topNodeClass="top" bottomNodeClass="bottom">上下节点</mover-node>
+                    <div class="bottom" style="height:100px;background:pink;"></div>
+                    <div style="display:flex;">
+                        <div class="left" style="height:100px;width:200px;background:red;"></div>
+                        <mover-node leftNodeClass="left" rightNodeClass="right">左右节点</mover-node>
+                        <div class="right" style="height:100px;width:200px;background:pink;"></div>
+                    </div>
+                    <mover-node style="height:200px;width:200px;background:green;">单独节点</mover-node>
+                </div>`,
     })
 
 </script>

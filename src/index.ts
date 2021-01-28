@@ -1,6 +1,6 @@
-import demo from './demo.vue'
+import moverNode from './mover-node.vue'
 
-const components = [demo]
+const components = [moverNode]
 
 const install = (Vue) => {
     if ((install as any).installed) return

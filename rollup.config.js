@@ -1,7 +1,6 @@
 import typescript from 'rollup-plugin-typescript2'
 import commonjs from 'rollup-plugin-commonjs'
 import json from 'rollup-plugin-json'
-import { terser } from 'rollup-plugin-terser'
 import nodeResolve from 'rollup-plugin-node-resolve'
 import vue from 'rollup-plugin-vue'
 import filesize from 'rollup-plugin-filesize'
@@ -13,7 +12,7 @@ import del from 'rollup-plugin-delete' //
 const isProduction = process.env.NODE_ENV === 'production'
 
 export default async () => ({
-    onwarn: function (message) {
+    onwarn: function(message) {
         if (
             /The 'this' keyword is equivalent to 'undefined' at the top level of an ES module, and has been rewritten./.test(
                 message
@@ -28,14 +27,14 @@ export default async () => ({
         {
             file: 'dist/index.umd.js',
             format: 'umd',
-            name: 'demo',
+            name: 'moverNode',
             sourcemap: false,
             globals: { vue: 'Vue' },
         },
         {
             file: 'demo/index.umd.js',
             format: 'umd',
-            name: 'demo',
+            name: 'moverNode',
             sourcemap: false,
             globals: { vue: 'Vue' },
         },
@@ -62,7 +61,8 @@ export default async () => ({
         }),
         typescript(),
         buble(),
-        terser(),
+        // 线上启用压缩模式
+        isProduction && (await import('rollup-plugin-terser')).terser(),
         filesize(),
         // 开启服务
         !isProduction &&

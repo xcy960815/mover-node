@@ -1,7 +1,7 @@
 {
-    "name": "rollup-vue-components-ts",
+    "name": "mover-node",
     "version": "1.0.0",
-    "description": "一个打包vue-ts 组件的rollup模版，内置rollup热更新，server服务",
+    "description": "一个基于vue自定义拖拽节点的库",
     "main": "dist/index.umd,js",
     "scripts": {
         "dev": "NODE_ENV=development ENV=daily rollup -c -w",
@@ -10,19 +10,20 @@
     },
     "keywords": [
         "rollup",
-        "vue-ts",
-        "vue",
-        "ts"
+        "mover",
+        "vue-mover",
+        "mover-node",
+        "mover-node-ts"
     ],
     "bugs": {
-        "url": "https://github.com/ChongYu-Yease/rollup-vue-components-ts/issues"
+        "url": "https://github.com/ChongYu-Yease/mover-node.git/issues"
     },
-    "homepage": "https://github.com/ChongYu-Yease/rollup-vue-components-ts#readme",
+    "homepage": "https://github.com/ChongYu-Yease/mover-node.git#readme",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ChongYu-Yease/rollup-vue-components-ts.git"
+        "url": "git+https://github.com/ChongYu-Yease/mover-node.git.git"
     },
-    "types": "./dist/demo.vue.d.ts",
+    "types": "./dist/mover-node.vue.d.ts",
     "author": "崇玉",
     "license": "MIT",
     "devDependencies": {
