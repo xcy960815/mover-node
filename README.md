@@ -1,17 +1,26 @@
-## 基于 rollup+ts+vue2.x 搭建
+## 安装方法： npm install --save mover-node
 
-#### 安装依赖
+## 使用方法：
 
+```js
+Vue.use(moverNode)
+new Vue({
+    el: '#app',
+    template: `<div id="app">
+                        <div class="top" style="height:100px;background:red;"></div>
+                        <mover-node topNodeClass="top" bottomNodeClass="bottom">上下节点</mover-node>
+                        <div class="bottom" style="height:100px;background:pink;"></div>
+                        <div style="display:flex;">
+                            <div class="left" style="height:100px;width:200px;background:red;"></div>
+                            <mover-node leftNodeClass="left" rightNodeClass="right">左右节点</mover-node>
+                            <div class="right" style="height:100px;width:200px;background:pink;"></div>
+                        </div>
+                        <mover-node style="height:200px;width:200px;background:green;">单独节点</mover-node>
+                    </div>`,
+})
 ```
-npm install
-```
 
-#### 添加文件
+## 注意事项：
 
-1. 在 src 中添加 vue 组件
-2. 在 index.ts 中引入
-
-#### 扩展
-
-1. 目前在开发环境已经引入热更新、server 组件 在编译开发的时候实时支持热更新
-2. 开发环境编译的代码不压缩、发布到 npm 上的代码压缩
+1. 参数一共四个：topNodeClass、bottomNodeClass、leftNodeClass、rightNodeClass 分别对应上面节点的 className、下面节点的 className、左面节点的 className、右面节点的 className。
+2. 参数两两配对使用，若是一个节点上面四个参数都有，上下节点的 className 优先级高于左右节点 className]
