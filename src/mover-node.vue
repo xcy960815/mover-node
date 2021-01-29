@@ -127,11 +127,11 @@ export default class MoverNode extends Vue {
     }
     const bottomNode: HTMLElement | null =
       document.querySelector(`.${this.bottomNodeClass}`) || null
-    let bottomNodeOriginalHeight: number
+    let bottomNodeOriginalOffsetTop: number
     if (bottomNode) {
-      bottomNodeOriginalHeight = bottomNode.getBoundingClientRect().height
+      bottomNodeOriginalOffsetTop = bottomNode.offsetTop
     }
-    // const dragNodeLeft: number = eventTargetElement.getBoundingClientRect().left
+
     const debounceFunction = this.debounce(this.handleTopAndBottomMousemove, this.time)
     document.onmousemove = (e) => {
       debounceFunction(
@@ -140,7 +140,7 @@ export default class MoverNode extends Vue {
         topNode,
         topNodeOriginalHeight,
         bottomNode,
-        bottomNodeOriginalHeight
+        bottomNodeOriginalOffsetTop
       )
     }
 
@@ -166,9 +166,9 @@ export default class MoverNode extends Vue {
       leftNodeOriginalWidth = leftNode.getBoundingClientRect().width
     }
     const rightNode: HTMLElement | null = document.querySelector(`.${this.rightNodeClass}`) || null
-    let rightNodeOriginalWidth: number
+    let rightNodeOriginalOffsetLeft: number
     if (rightNode) {
-      rightNodeOriginalWidth = rightNode.getBoundingClientRect().width
+      rightNodeOriginalOffsetLeft = rightNode.offsetLeft
     }
 
     const debounceFunction = this.debounce(this.handleLeftAndRightMousemove, this.time)
@@ -179,7 +179,7 @@ export default class MoverNode extends Vue {
         leftNode,
         leftNodeOriginalWidth,
         rightNode,
-        rightNodeOriginalWidth
+        rightNodeOriginalOffsetLeft
       )
     }
 
@@ -228,7 +228,7 @@ export default class MoverNode extends Vue {
     leftNode: HTMLElement,
     leftNodeOriginalWidth: number,
     rightNode: HTMLElement,
-    rightNodeOriginalWidth: number
+    rightNodeOriginalOffsetLeft: number
   ) {
     const endPositionX = e.clientX
     // 鼠标运动轨迹
@@ -240,7 +240,7 @@ export default class MoverNode extends Vue {
       leftNode.style.maxWidth = leftNodeOriginalWidth + moveDistance + 'px'
     }
     if (rightNode) {
-      rightNode.style.left = rightNodeOriginalWidth + moveDistance + 'px'
+      rightNode.style.left = rightNodeOriginalOffsetLeft + moveDistance + 'px'
     }
   }
   /**
@@ -257,7 +257,7 @@ export default class MoverNode extends Vue {
     topNode: HTMLElement,
     topNodeOriginalHeight: number,
     bottomNode: HTMLElement,
-    bottomNodeOriginalHeight: number
+    bottomNodeOriginalOffsetTop: number
   ) {
     const endPositionY = e.clientY
     // 鼠标运动轨迹
@@ -268,7 +268,7 @@ export default class MoverNode extends Vue {
       topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px'
     }
     if (bottomNode) {
-      bottomNode.style.top = bottomNodeOriginalHeight + moveDistance + 'px'
+      bottomNode.style.top = bottomNodeOriginalOffsetTop + moveDistance + 'px'
     }
   }
   /**
