@@ -262,12 +262,14 @@ export default class MoverNode extends Vue {
     const endPositionY = e.clientY
     // 鼠标运动轨迹
     const moveDistance = endPositionY - startPositionY
+
     if (topNode) {
       topNode.style.height = topNodeOriginalHeight + moveDistance + 'px'
       topNode.style.minHeight = topNodeOriginalHeight + moveDistance + 'px'
       topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px'
     }
     if (bottomNode) {
+      bottomNode.style.position = 'static'
       bottomNode.style.top = bottomNodeOriginalOffsetTop + moveDistance + 'px'
     }
   }
