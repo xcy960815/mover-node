@@ -240,6 +240,7 @@ export default class MoverNode extends Vue {
       leftNode.style.maxWidth = leftNodeOriginalWidth + moveDistance + 'px'
     }
     if (rightNode) {
+      rightNode.style.position = 'static'
       rightNode.style.left = rightNodeOriginalOffsetLeft + moveDistance + 'px'
     }
   }
