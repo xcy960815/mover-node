@@ -38,6 +38,10 @@ export default async () => ({
             sourcemap: false,
             globals: { vue: 'Vue' },
         },
+        {
+            format: 'es',
+            file: 'dist/index.esm.js',
+        },
     ],
     plugins: [
         //源代码更改马上清空dist文件夹下面打包过的文件 防止代码冗余
