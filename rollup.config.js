@@ -38,6 +38,13 @@ export default async () => ({
             sourcemap: false,
             globals: { vue: 'Vue' },
         },
+        {
+            file: 'demo/index.esm.js',
+            format: 'esm',
+            name: 'moverNode',
+            sourcemap: false,
+            globals: { vue: 'Vue' },
+        },
     ],
     plugins: [
         //源代码更改马上清空dist文件夹下面打包过的文件 防止代码冗余
@@ -68,8 +75,8 @@ export default async () => ({
         !isProduction &&
             serve({
                 open: false,
-                host: 'localhost',
-                port: 9004,
+                host: 'h5.dev.weidian.com',
+                port: 9999,
                 historyApiFallback: true,
                 contentBase: 'demo',
                 headers: {
