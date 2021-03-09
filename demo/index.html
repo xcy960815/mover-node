@@ -28,19 +28,26 @@
     Vue.use(moverNode)
     new Vue({
         el: '#app',
-        template: `<div id="app">
+        template: `<div id="app" >
                     <div class="top" style="height:100px;background:red;"></div>
                     <mover-node topNodeClass="top" bottomNodeClass="bottom">上下节点</mover-node>
                     <div class="bottom" style="height:100px;background:pink;"></div>
                     <div class="top1" style="height:100px;background:red;"></div>
                     <mover-node topNodeClass="top1" bottomNodeClass="bottom1">上下节点</mover-node>
                     <div class="bottom1" style="height:100px;background:pink;"></div>
-                    <div style="display:flex;">
-                        <div class="left" style="height:100px;flex:1;background:red;"></div>
-                        <mover-node leftNodeClass="left" rightNodeClass="right">左右节点</mover-node>
-                        <div class="right" style="height:100px;flex:1;background:pink;"></div>
+                    <div style="display:flex;" class="parent">
+                        <div class="left"  style="height:100px;flex:1;background:red;"></div>
+                        <mover-node leftNodeClass="left" parentNodeClass="parent" :change-right-node-width="true" rightNodeClass="right">左右节点</mover-node>
+                        <div class="right" style="height:100px;flex:2;background:pink;"></div>
                     </div>
                     <mover-node style="height:200px;width:200px;background:green;">单独节点</mover-node>
+                    <div style="display:flex;padding-right:200px;overflow: hidden;" >
+                        <div class="left1"  style="height:100px;width:200px;background:red;">
+                            <div style="min-width:100px;">我是汉字</div>
+                            </div>
+                        <mover-node leftNodeClass="left1"  rightNodeClass="right1">左右节点</mover-node>
+                        <div class="right1" style="height:100px;width:300px;min-width:300px;max-width:300px;background:pink;"></div>
+                    </div>
                 </div>`,
     })
 

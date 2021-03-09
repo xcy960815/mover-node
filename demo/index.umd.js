@@ -492,13 +492,13 @@
                 topNodeOriginalHeight = topNode.getBoundingClientRect().height;
             }
             var bottomNode = document.querySelector("." + this.bottomNodeClass) || null;
-            var bottomNodeOriginalOffsetTop;
+            var bottomNodeOriginalOffsetHeight;
             if (bottomNode) {
-                bottomNodeOriginalOffsetTop = bottomNode.offsetTop;
+                bottomNodeOriginalOffsetHeight = bottomNode.offsetHeight;
             }
             var debounceFunction = this.debounce(this.handleTopAndBottomMousemove, this.time);
             document.onmousemove = function (e) {
-                debounceFunction(e, startPositionY, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetTop);
+                debounceFunction(e, startPositionY, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetHeight);
             };
             document.onmouseup = function () {
                 document.onmousemove = null;
@@ -519,13 +519,13 @@
                 leftNodeOriginalWidth = leftNode.getBoundingClientRect().width;
             }
             var rightNode = document.querySelector("." + this.rightNodeClass) || null;
-            var rightNodeOriginalOffsetLeft;
+            var rightNodeOriginalOffsetWidth;
             if (rightNode) {
-                rightNodeOriginalOffsetLeft = rightNode.offsetLeft;
+                rightNodeOriginalOffsetWidth = rightNode.offsetWidth;
             }
             var debounceFunction = this.debounce(this.handleLeftAndRightMousemove, this.time);
             document.onmousemove = function (e) {
-                debounceFunction(e, startPositionX, leftNode, leftNodeOriginalWidth, rightNode, rightNodeOriginalOffsetLeft);
+                debounceFunction(e, startPositionX, leftNode, leftNodeOriginalWidth, rightNode, rightNodeOriginalOffsetWidth, eventTargetElement);
             };
             document.onmouseup = function () {
                 document.onmousemove = null;
@@ -533,6 +533,11 @@
             };
             return false;
         };
+        /**
+         * 处理单独节点
+         * @param event MouseEvent
+         * @param eventTargetElement 运动节点 HTMLElement
+         */
         MoverNode.prototype.handleSelfNode = function (event, eventTargetElement) {
             var startPositionX = event.clientX;
             var startPositionY = event.clientY;
@@ -556,17 +561,34 @@
          * @param rightNode 拖动区域的右侧节点
          * @param rightNodeOriginalWidth 拖动区域的右侧节点的开始宽度
          */
-        MoverNode.prototype.handleLeftAndRightMousemove = function (e, startPositionX, leftNode, leftNodeOriginalWidth, rightNode, rightNodeOriginalOffsetLeft) {
+        MoverNode.prototype.handleLeftAndRightMousemove = function (e, startPositionX, leftNode, leftNodeOriginalWidth, rightNode, rightNodeOriginalOffsetWidth, eventTargetElement) {
             var endPositionX = e.clientX;
             // 鼠标运动轨迹
             var moveDistance = endPositionX - startPositionX;
-            if (leftNode) {
+            // 获取运动节点的父节点
+            // const parentElement: HTMLElement | null = eventTargetElement.parentElement
+            // const parentElementWidth: number | undefined = parentElement?.offsetWidth
+            // const leftNodeWidth: number = leftNode.offsetWidth
+            // const rightNodeWidth: number = rightNode.offsetWidth
+            // const targetElementWidth: number = eventTargetElement?.offsetWidth
+            // 如果运动节点 和左右节点相加等于 父节点的宽度 就停止运动 防止拖拽节点超出页面范围
+            // if (
+            //   parentElementWidth &&
+            //   (parentElementWidth <= leftNodeWidth + targetElementWidth + 1 ||
+            //     parentElementWidth <= rightNodeWidth + targetElementWidth + 1)
+            // )
+            //   return
+            if (leftNode && rightNode.offsetWidth) {
+                leftNode.style.overflow = 'hidden';
                 leftNode.style.width = leftNodeOriginalWidth + moveDistance + 'px';
                 leftNode.style.minWidth = leftNodeOriginalWidth + moveDistance + 'px';
                 leftNode.style.maxWidth = leftNodeOriginalWidth + moveDistance + 'px';
             }
-            if (rightNode) {
-                rightNode.style.left = rightNodeOriginalOffsetLeft + moveDistance + 'px';
+            if (rightNode && leftNode.offsetWidth) {
+                rightNode.style.overflow = 'hidden';
+                rightNode.style.width = rightNodeOriginalOffsetWidth - moveDistance + 'px';
+                rightNode.style.minWidth = rightNodeOriginalOffsetWidth - moveDistance + 'px';
+                rightNode.style.maxWidth = rightNodeOriginalOffsetWidth - moveDistance + 'px';
             }
         };
         /**
@@ -577,17 +599,19 @@
          * @param bottomNode 拖动区域的下侧节点
          * @param bottomNodeOriginalHeight 拖动区域的下侧节点的开始高度
          */
-        MoverNode.prototype.handleTopAndBottomMousemove = function (e, startPositionY, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetTop) {
+        MoverNode.prototype.handleTopAndBottomMousemove = function (e, startPositionY, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetHeight) {
             var endPositionY = e.clientY;
             // 鼠标运动轨迹
             var moveDistance = endPositionY - startPositionY;
-            if (topNode) {
+            if (topNode && bottomNode.offsetHeight >= 10) {
                 topNode.style.height = topNodeOriginalHeight + moveDistance + 'px';
                 topNode.style.minHeight = topNodeOriginalHeight + moveDistance + 'px';
                 topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px';
             }
-            if (bottomNode) {
-                bottomNode.style.top = bottomNodeOriginalOffsetTop + moveDistance + 'px';
+            if (bottomNode && topNode.offsetHeight >= 10) {
+                bottomNode.style.height = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
+                bottomNode.style.minHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
+                bottomNode.style.maxHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
             }
         };
         /**
@@ -616,6 +640,14 @@
             enumerable: false,
             configurable: true
         });
+        MoverNode.prototype.mounted = function () {
+            // 给移动节点设定 固定宽度 避免拖拽过程中 引起高度变化
+            var rootElement = this.$refs['mover-node'];
+            var rootElementInitWidth = rootElement.offsetWidth;
+            rootElement.style.width = rootElementInitWidth + 'px';
+            rootElement.style.minWidth = rootElementInitWidth + 'px';
+            rootElement.style.maxWidth = rootElementInitWidth + 'px';
+        };
         __decorate([
             Prop({
                 default: function () { return ''; },
@@ -642,7 +674,7 @@
         ], MoverNode.prototype, "bottomNodeClass", void 0);
         __decorate([
             Prop({
-                default: function () { return 7; },
+                default: function () { return 10; },
                 type: Number,
             })
         ], MoverNode.prototype, "time", void 0);
@@ -814,11 +846,11 @@
       /* style */
       var __vue_inject_styles__ = function (inject) {
         if (!inject) { return }
-        inject("data-v-626e30bc_0", { source: ".mover-node[data-v-626e30bc] {\n  position: relative;\n}\n.mover-node .default-mover-node[data-v-626e30bc] {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i[data-v-626e30bc] {\n  display: table-cell;\n  vertical-align: middle;\n}\n", map: {"version":3,"sources":["mover-node.vue"],"names":[],"mappings":"AAAA;EACE,kBAAkB;AACpB;AACA;EACE,cAAc;EACd,yBAAyB;EACzB,YAAY;EACZ,WAAW;EACX,kBAAkB;EAClB,kBAAkB;AACpB;AACA;EACE,mBAAmB;EACnB,sBAAsB;AACxB","file":"mover-node.vue","sourcesContent":[".mover-node {\n  position: relative;\n}\n.mover-node .default-mover-node {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i {\n  display: table-cell;\n  vertical-align: middle;\n}\n"]}, media: undefined });
+        inject("data-v-a0b5041e_0", { source: ".mover-node[data-v-a0b5041e] {\n  position: relative;\n}\n.mover-node .default-mover-node[data-v-a0b5041e] {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i[data-v-a0b5041e] {\n  display: table-cell;\n  vertical-align: middle;\n}\n", map: {"version":3,"sources":["mover-node.vue"],"names":[],"mappings":"AAAA;EACE,kBAAkB;AACpB;AACA;EACE,cAAc;EACd,yBAAyB;EACzB,YAAY;EACZ,WAAW;EACX,kBAAkB;EAClB,kBAAkB;AACpB;AACA;EACE,mBAAmB;EACnB,sBAAsB;AACxB","file":"mover-node.vue","sourcesContent":[".mover-node {\n  position: relative;\n}\n.mover-node .default-mover-node {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i {\n  display: table-cell;\n  vertical-align: middle;\n}\n"]}, media: undefined });
 
       };
       /* scoped */
-      var __vue_scope_id__ = "data-v-626e30bc";
+      var __vue_scope_id__ = "data-v-a0b5041e";
       /* module identifier */
       var __vue_module_identifier__ = undefined;
       /* functional template */

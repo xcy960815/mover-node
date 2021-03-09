@@ -27,6 +27,11 @@ export default class MoverNode extends Vue {
      * @param eventTargetElement 运动节点 HTMLElement
      */
     private handleLeftAndRightNode;
+    /**
+     * 处理单独节点
+     * @param event MouseEvent
+     * @param eventTargetElement 运动节点 HTMLElement
+     */
     private handleSelfNode;
     /**
      * @param e MouseEvent
@@ -54,4 +59,5 @@ export default class MoverNode extends Vue {
      */
     private handleSelfMousemove;
     private get notSlot();
+    private mounted;
 }

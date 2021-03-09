@@ -40,7 +40,7 @@ export default class MoverNode extends Vue {
   bottomNodeClass!: string
 
   @Prop({
-    default: () => 7,
+    default: () => 10,
     type: Number,
   })
   time!: number
@@ -118,18 +118,16 @@ export default class MoverNode extends Vue {
    */
   handleTopAndBottomNode(event: MouseEvent, eventTargetElement: HTMLElement): false {
     const startPositionY = event.clientY
-
     const topNode: HTMLElement | null = document.querySelector(`.${this.topNodeClass}`) || null
-
     let topNodeOriginalHeight: number
     if (topNode) {
       topNodeOriginalHeight = topNode.getBoundingClientRect().height
     }
     const bottomNode: HTMLElement | null =
       document.querySelector(`.${this.bottomNodeClass}`) || null
-    let bottomNodeOriginalOffsetTop: number
+    let bottomNodeOriginalOffsetHeight: number
     if (bottomNode) {
-      bottomNodeOriginalOffsetTop = bottomNode.offsetTop
+      bottomNodeOriginalOffsetHeight = bottomNode.offsetHeight
     }
 
     const debounceFunction = this.debounce(this.handleTopAndBottomMousemove, this.time)
@@ -140,7 +138,7 @@ export default class MoverNode extends Vue {
         topNode,
         topNodeOriginalHeight,
         bottomNode,
-        bottomNodeOriginalOffsetTop
+        bottomNodeOriginalOffsetHeight
       )
     }
 
@@ -166,9 +164,10 @@ export default class MoverNode extends Vue {
       leftNodeOriginalWidth = leftNode.getBoundingClientRect().width
     }
     const rightNode: HTMLElement | null = document.querySelector(`.${this.rightNodeClass}`) || null
-    let rightNodeOriginalOffsetLeft: number
+
+    let rightNodeOriginalOffsetWidth: number
     if (rightNode) {
-      rightNodeOriginalOffsetLeft = rightNode.offsetLeft
+      rightNodeOriginalOffsetWidth = rightNode.offsetWidth
     }
 
     const debounceFunction = this.debounce(this.handleLeftAndRightMousemove, this.time)
@@ -179,7 +178,8 @@ export default class MoverNode extends Vue {
         leftNode,
         leftNodeOriginalWidth,
         rightNode,
-        rightNodeOriginalOffsetLeft
+        rightNodeOriginalOffsetWidth,
+        eventTargetElement
       )
     }
 
@@ -189,10 +189,14 @@ export default class MoverNode extends Vue {
     }
     return false
   }
+  /**
+   * 处理单独节点
+   * @param event MouseEvent
+   * @param eventTargetElement 运动节点 HTMLElement
+   */
   private handleSelfNode(event: MouseEvent, eventTargetElement: HTMLElement): false {
     const startPositionX = event.clientX
     const startPositionY = event.clientY
-
     const slefNodeLeft = eventTargetElement.clientLeft
     const slefNodeTop = eventTargetElement.clientTop
 
@@ -228,19 +232,37 @@ export default class MoverNode extends Vue {
     leftNode: HTMLElement,
     leftNodeOriginalWidth: number,
     rightNode: HTMLElement,
-    rightNodeOriginalOffsetLeft: number
+    rightNodeOriginalOffsetWidth: number,
+    eventTargetElement: HTMLElement
   ) {
     const endPositionX = e.clientX
     // 鼠标运动轨迹
     const moveDistance = endPositionX - startPositionX
+    // 获取运动节点的父节点
+    // const parentElement: HTMLElement | null = eventTargetElement.parentElement
+    // const parentElementWidth: number | undefined = parentElement?.offsetWidth
+    // const leftNodeWidth: number = leftNode.offsetWidth
+    // const rightNodeWidth: number = rightNode.offsetWidth
+    // const targetElementWidth: number = eventTargetElement?.offsetWidth
+    // 如果运动节点 和左右节点相加等于 父节点的宽度 就停止运动 防止拖拽节点超出页面范围
+    // if (
+    //   parentElementWidth &&
+    //   (parentElementWidth <= leftNodeWidth + targetElementWidth + 1 ||
+    //     parentElementWidth <= rightNodeWidth + targetElementWidth + 1)
+    // )
+    //   return
 
-    if (leftNode) {
+    if (leftNode && rightNode.offsetWidth) {
+      leftNode.style.overflow = 'hidden'
       leftNode.style.width = leftNodeOriginalWidth + moveDistance + 'px'
       leftNode.style.minWidth = leftNodeOriginalWidth + moveDistance + 'px'
       leftNode.style.maxWidth = leftNodeOriginalWidth + moveDistance + 'px'
     }
-    if (rightNode) {
-      rightNode.style.left = rightNodeOriginalOffsetLeft + moveDistance + 'px'
+    if (rightNode && leftNode.offsetWidth) {
+      rightNode.style.overflow = 'hidden'
+      rightNode.style.width = rightNodeOriginalOffsetWidth - moveDistance + 'px'
+      rightNode.style.minWidth = rightNodeOriginalOffsetWidth - moveDistance + 'px'
+      rightNode.style.maxWidth = rightNodeOriginalOffsetWidth - moveDistance + 'px'
     }
   }
   /**
@@ -257,18 +279,20 @@ export default class MoverNode extends Vue {
     topNode: HTMLElement,
     topNodeOriginalHeight: number,
     bottomNode: HTMLElement,
-    bottomNodeOriginalOffsetTop: number
+    bottomNodeOriginalOffsetHeight: number
   ) {
     const endPositionY = e.clientY
     // 鼠标运动轨迹
     const moveDistance = endPositionY - startPositionY
-    if (topNode) {
+    if (topNode && bottomNode.offsetHeight >= 10) {
       topNode.style.height = topNodeOriginalHeight + moveDistance + 'px'
       topNode.style.minHeight = topNodeOriginalHeight + moveDistance + 'px'
       topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px'
     }
-    if (bottomNode) {
-      bottomNode.style.top = bottomNodeOriginalOffsetTop + moveDistance + 'px'
+    if (bottomNode && topNode.offsetHeight >= 10) {
+      bottomNode.style.height = bottomNodeOriginalOffsetHeight - moveDistance + 'px'
+      bottomNode.style.minHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px'
+      bottomNode.style.maxHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px'
     }
   }
   /**
@@ -298,23 +322,28 @@ export default class MoverNode extends Vue {
   }
   private get notSlot(): boolean {
     const slots = this.$slots
-    const notSlot = Object.keys(slots).map((slot) => slot).length === 0
+    const notSlot: boolean = Object.keys(slots).map((slot) => slot).length === 0
     return notSlot
+  }
+  private mounted() {
+    // 给移动节点设定 固定宽度 避免拖拽过程中 引起高度变化
+    const rootElement = this.$refs['mover-node'] as HTMLDivElement
+    const rootElementInitWidth: number = rootElement.offsetWidth
+    rootElement.style.width = rootElementInitWidth + 'px'
+    rootElement.style.minWidth = rootElementInitWidth + 'px'
+    rootElement.style.maxWidth = rootElementInitWidth + 'px'
   }
 }
 </script>
 <style lang='less' scoped>
 .mover-node {
   position: relative;
-  // cursor: pointer;
-  // margin: 0 5px;
   .default-mover-node {
     display: table;
     background-color: #909399;
     height: 100%;
     width: 20px;
     border-radius: 4px;
-
     text-align: center;
     i {
       display: table-cell;
