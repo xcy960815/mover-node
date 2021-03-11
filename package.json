@@ -1,6 +1,6 @@
 {
     "name": "mover-node",
-    "version": "1.1.0",
+    "version": "1.1.5",
     "description": "一个基于vue自定义拖拽节点的库",
     "main": "dist/index.umd.js",
     "module": "dist/index.esm.js",
@@ -24,7 +24,7 @@
         "type": "git",
         "url": "git+https://github.com/ChongYu-Yease/mover-node.git.git"
     },
-    "types": "./dist/mover-node.vue.d.ts",
+    "types": "./dist/typing/mover-node.vue.d.ts",
     "author": "崇玉",
     "license": "MIT",
     "devDependencies": {

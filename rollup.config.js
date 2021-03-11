@@ -8,7 +8,9 @@ import buble from 'rollup-plugin-buble'
 import serve from 'rollup-plugin-serve'
 import livereload from 'rollup-plugin-livereload'
 import replace from 'rollup-plugin-replace'
-import del from 'rollup-plugin-delete' //
+import del from 'rollup-plugin-delete'
+import path from 'path'
+const getPath = (_path) => path.resolve(__dirname, _path)
 const isProduction = process.env.NODE_ENV === 'production'
 
 export default async () => ({
@@ -22,7 +24,7 @@ export default async () => ({
         }
         console.error(message)
     },
-    input: 'src/index.ts',
+    input: 'src/main.ts',
     output: [
         {
             file: 'dist/index.umd.js',
@@ -39,7 +41,7 @@ export default async () => ({
             globals: { vue: 'Vue' },
         },
         {
-            file: 'demo/index.esm.js',
+            file: 'dist/index.esm.js',
             format: 'esm',
             name: 'moverNode',
             sourcemap: false,
@@ -50,10 +52,9 @@ export default async () => ({
         //源代码更改马上清空dist文件夹下面打包过的文件 防止代码冗余
         del({
             targets: [
-                'dist',
+                './dist/index.esm.js',
+                './dist/index.umd.js',
                 './demo/index.umd.js',
-                './demo/index.vue.d.ts',
-                './demo/index.d.ts',
             ],
         }),
         json(),
@@ -66,7 +67,10 @@ export default async () => ({
             css: true,
             compileTemplate: true,
         }),
-        typescript(),
+        typescript({
+            useTsconfigDeclarationDir: true,
+            extensions: ['.js', '.ts', '.tsx'],
+        }),
         buble(),
         // 线上启用压缩模式
         isProduction && (await import('rollup-plugin-terser')).terser(),

@@ -1,8 +1,6 @@
 <template>
   <div class="mover-node" ref="mover-node" @mousedown="handleDragNode">
-    <div v-if="notSlot" class="default-mover-node">
-      <!-- <i class="el-icon-rank"></i> -->
-    </div>
+    <div v-if="notSlot" class="default-mover-node"></div>
     <slot v-else></slot>
   </div>
 </template>
@@ -14,6 +12,7 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
   name: 'MoverNode',
 })
 export default class MoverNode extends Vue {
+  static install(vue: typeof Vue): void {}
   timer: number = 0
   @Prop({
     default: () => '',
@@ -71,8 +70,9 @@ export default class MoverNode extends Vue {
       }
     })
   }
+
   // 防抖函数
-  private debounce(fn: Function, delay): Function {
+  private debounceFunction(fn: Function, delay: number): Function {
     let timer: number = 0
     const _this = this // 取debounce执行作用域的this
     return function () {
@@ -130,7 +130,7 @@ export default class MoverNode extends Vue {
       bottomNodeOriginalOffsetHeight = bottomNode.offsetHeight
     }
 
-    const debounceFunction = this.debounce(this.handleTopAndBottomMousemove, this.time)
+    const debounceFunction = this.debounceFunction(this.handleTopAndBottomMousemove, this.time)
     document.onmousemove = (e) => {
       debounceFunction(
         e,
@@ -170,7 +170,7 @@ export default class MoverNode extends Vue {
       rightNodeOriginalOffsetWidth = rightNode.offsetWidth
     }
 
-    const debounceFunction = this.debounce(this.handleLeftAndRightMousemove, this.time)
+    const debounceFunction = this.debounceFunction(this.handleLeftAndRightMousemove, this.time)
     document.onmousemove = (e) => {
       debounceFunction(
         e,
@@ -200,7 +200,7 @@ export default class MoverNode extends Vue {
     const slefNodeLeft = eventTargetElement.clientLeft
     const slefNodeTop = eventTargetElement.clientTop
 
-    const debounceFunction = this.debounce(this.handleSelfMousemove, this.time)
+    const debounceFunction = this.debounceFunction(this.handleSelfMousemove, this.time)
     document.onmousemove = (e) => {
       debounceFunction(
         e,
