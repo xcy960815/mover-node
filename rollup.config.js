@@ -9,8 +9,6 @@ import serve from 'rollup-plugin-serve'
 import livereload from 'rollup-plugin-livereload'
 import replace from 'rollup-plugin-replace'
 import del from 'rollup-plugin-delete'
-import path from 'path'
-const getPath = (_path) => path.resolve(__dirname, _path)
 const isProduction = process.env.NODE_ENV === 'production'
 
 export default async () => ({
