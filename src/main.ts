@@ -1,10 +1,9 @@
 import moverNode from './mover-node.vue'
-
 const components = [moverNode]
 
-const install = (Vue) => {
-    if ((install as any).installed) return
-    ;(install as any).installed = true
+const install: any = (Vue) => {
+    if (install.installed) return
+    install.installed = true
     components.forEach((component: any) => {
         Vue.component(component.extendOptions.name, component)
     })

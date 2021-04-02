@@ -24,33 +24,25 @@
     <div id="app"></div>
 </body>
 <script lang="ts">
-    /**
-     * 
-                    <div style="display:flex;" class="parent">
-                        <div class="left"  style="height:100px;flex:1;background:red;"></div>
-                        <mover-node leftNodeClass="left" parentNodeClass="parent" :change-right-node-width="true" rightNodeClass="right">左右节点</mover-node>
-                        <div class="right" style="height:100px;flex:2;background:pink;"></div>
-                    </div>
-                    <mover-node style="height:200px;width:200px;background:green;">单独节点</mover-node>
-                    <div style="display:flex;padding-right:200px;overflow: hidden;" >
-                        <div class="left1"  style="height:100px;width:200px;background:red;">
-                            <div style="min-width:100px;">我是汉字</div>
-                            </div>
-                        <mover-node leftNodeClass="left1"  rightNodeClass="right1">左右节点</mover-node>
-                        <div class="right1" style="height:100px;width:300px;min-width:300px;max-width:300px;background:pink;"></div>
-                    </div>
+    // <div style="display:flex;margin:0 40%; margin-top:100px">
+    //     <div class="left"  style="height:100px;flex:1;background:red;"></div>
+    //     <mover-node leftNodeClass="left" :clone-node="true" style="line-height:6" rightNodeClass="right">左右节点</mover-node>
+    //     <div class="right" style="height:100px;flex:2;background:pink;"></div>
+    // </div>
 
-                    <div class="top1" style="height:100px;background:red;"></div>
-                    <mover-node topNodeClass="top1" bottomNodeClass="bottom1">上下节点</mover-node>
-                    <div class="bottom1" style="height:100px;background:pink;"></div>
-    */
     Vue.use(moverNode)
     new Vue({
         el: '#app',
         template: `<div id="app" style="margin-top:100px">
-                        <div class="top" style="height:100px;background:red;"></div>
-                        <mover-node topNodeClass="top" :clone-node="true" bottomNodeClass="bottom">上下节点</mover-node>
-                        <div class="bottom" style="height:100px;background:pink;"></div>
+                    <div class="top" style="height:100px;background:red;"></div>
+                    <mover-node topNodeClass="top" :clone-node="true" style="text-align:center;"  bottomNodeClass="bottom">上下节点</mover-node>
+                    <div class="bottom" style="height:100px;background:pink;"></div>
+                    
+                    <div style="display:flex;margin:0 40%; margin-top:100px">
+                        <div class="left"  style="height:100px;width:0px;background:red;"></div>
+                        <mover-node leftNodeClass="left"  style="line-height:6" rightNodeClass="right">左右节点</mover-node>
+                        <div class="right" style="height:100px;flex:2;background:pink;"></div>
+                    </div>
                 </div>`,
     })
 

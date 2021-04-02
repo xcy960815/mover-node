@@ -417,7 +417,7 @@
         function MoverNode() {
             var _this_1 = _super !== null && _super.apply(this, arguments) || this;
             // 延时器id
-            _this_1.timer = 0;
+            _this_1.timer = null;
             // 父节点的position
             _this_1.parantElementPosition = '';
             return _this_1;
@@ -449,6 +449,7 @@
                 }, delay);
             };
         };
+        // 开始拖拽节点
         MoverNode.prototype.handleDragNode = function (event) {
             // 取消事件默认行为 防止页面拖动层的文字被选中
             event = event || window.event;
@@ -464,13 +465,13 @@
             else {
                 event.returnValue = false;
             }
-            var eventTargetElement = event.target;
+            var moveElement = event.target;
             if (this.topNodeClass && this.bottomNodeClass) {
-                this.handleTopBottomNode(event, eventTargetElement);
+                this.handleTopBottomNode(event, moveElement);
                 return;
             }
             else if (this.leftNodeClass && this.rightNodeClass) {
-                // this.handleLeftAndRightNode(event, eventTargetElement)
+                this.handleLeftAndRightNode(event, moveElement);
                 return;
             }
             else {
@@ -483,119 +484,275 @@
          * @param event MouseEvent
          * @param eventTargetElement 运动节点 HTMLElement
          */
-        MoverNode.prototype.handleTopBottomNode = function (event, eventTargetElement) {
+        MoverNode.prototype.handleTopBottomNode = function (event, moveElement) {
             var _this_1 = this;
             // 移动节点的父节点
-            this.parantElement = eventTargetElement.parentElement;
+            this.parantElement = moveElement.parentElement;
             // 移动节点的父节点的 position
             this.parantElementPosition = this.parantElement.style.position || 'static';
-            // 复制节点的offSetTop
-            var cloneNodeTopBottomElementOffSetTop;
+            var cloneMoveElement;
             if (this.cloneNode) {
+                // 将父节点的
                 this.parantElement.style.position = 'relative';
                 // 初始化的时候就进行 节点复制 避免多次无用复制
-                this.cloneNodeTopBottomElement = eventTargetElement.cloneNode(true);
-                this.cloneNodeTopBottomElement.style.position = 'absolute';
-                this.cloneNodeTopBottomElement.style.opacity = '0.5';
-                this.cloneNodeTopBottomElement.style.width = eventTargetElement.offsetWidth + 'px';
-                this.cloneNodeTopBottomElement.style.height = eventTargetElement.offsetHeight + 'px';
-                this.cloneNodeTopBottomElement.style.top = eventTargetElement.offsetTop + 'px';
-                this.cloneNodeTopBottomElement.style.left = eventTargetElement.offsetLeft + 'px';
-                cloneNodeTopBottomElementOffSetTop = eventTargetElement.offsetTop;
-                this.parantElement.appendChild(this.cloneNodeTopBottomElement);
+                cloneMoveElement = moveElement.cloneNode(true);
+                cloneMoveElement.style.position = 'absolute';
+                cloneMoveElement.style.opacity = '0.5';
+                cloneMoveElement.style.width = moveElement.offsetWidth + 'px';
+                cloneMoveElement.style.height = moveElement.offsetHeight + 'px';
+                cloneMoveElement.style.top = moveElement.offsetTop + 'px';
+                cloneMoveElement.style.left = moveElement.offsetLeft + 'px';
+                this.parantElement.appendChild(cloneMoveElement);
             }
+            var cloneMoveElementTop = cloneMoveElement.offsetTop;
             // 开始位置
             var startPositionY = event.clientY;
             // 上节点
             var topNode = document.querySelector("." + this.topNodeClass);
-            var topNodeOriginalHeight = topNode.getBoundingClientRect().height;
+            // 上节点的高度
+            var topNodeHeight = topNode.offsetHeight;
             // 下节点
             var bottomNode = document.querySelector("." + this.bottomNodeClass);
-            var bottomNodeOriginalOffsetHeight = bottomNode.offsetHeight;
+            // 下节点的初始高度
+            var bottomNodeHeight = bottomNode.offsetHeight;
             // 防抖函数
-            var debounceFunction = this.debounceFunction(this.handleTopBottomMousemove, this.time);
-            //  document.onmousemove
+            var debounceFunction = this.debounceFunction(this.handleUpAndDownMove, this.time);
             // 鼠标移动的时候
-            this.onmousemoveFunction = document.onmousemove = function (e) {
-                // 结束点的y轴
-                var endPositionY = e.clientY;
+            document.onmousemove = function (e) {
                 // 鼠标运动距离
-                var moveDistance = endPositionY - startPositionY;
-                debounceFunction(moveDistance, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetHeight, eventTargetElement, _this_1.cloneNodeTopBottomElement, cloneNodeTopBottomElementOffSetTop);
+                var moveDistance = e.clientY - startPositionY;
+                // 启用防抖函数
+                debounceFunction(moveDistance, topNode, topNodeHeight, bottomNode, bottomNodeHeight, moveElement, cloneMoveElement, cloneMoveElementTop);
             };
             // 当鼠标抬起的时候
             document.onmouseup = function (e) { return __awaiter(_this_1, void 0, void 0, function () {
-                var endPositionY, moveDistance;
+                var moveDistance;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            endPositionY = e.clientY;
-                            moveDistance = endPositionY - startPositionY;
-                            if (!this.cloneNode) { return [3 /*break*/, 2]; }
-                            // 当使用了cloneNode属性的时候 鼠标抬起的时候 修改上下节点的高度
-                            return [4 /*yield*/, this.handleTopBottomMouseUp(moveDistance, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetHeight)];
-                        case 1:
-                            // 当使用了cloneNode属性的时候 鼠标抬起的时候 修改上下节点的高度
-                            _a.sent();
-                            _a.label = 2;
-                        case 2:
-                            document.onmousemove = null;
-                            document.onmouseup = null;
-                            return [2 /*return*/];
+                    moveDistance = e.clientY - startPositionY;
+                    // 移除子节点
+                    if (this.cloneNode) {
+                        this.handleStopUpAndDownMove(moveDistance, topNode, topNodeHeight, bottomNode, bottomNodeHeight, cloneMoveElement);
                     }
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                    return [2 /*return*/];
                 });
             }); };
             return false;
         };
-        MoverNode.prototype.handleTopBottomMouseUp = function (moveDistance, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetHeight) {
-            // 开始修改上下节点的height
-            topNode.style.height = topNodeOriginalHeight + moveDistance + 'px';
-            topNode.style.minHeight = topNodeOriginalHeight + moveDistance + 'px';
-            topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px';
-            // 下节点
-            bottomNode.style.height = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-            bottomNode.style.minHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-            bottomNode.style.maxHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-            // 拖拽完成 将父节点的position 恢复原样
-            this.parantElement.style.position = this.parantElementPosition;
-            // 移除拖拽过程中的创建子节点
-            this.parantElement.removeChild(this.cloneNodeTopBottomElement);
+        /**
+         * 此方法只处理 上下节点的height
+         * @param moveDistance 移动距离
+         * @param topNode 拖动区域的上侧节点
+         * @param topNodeHeight 上节点的开始高度
+         * @param bottomNode 拖动区域的下侧节点
+         * @param bottomNodeHeight 下节点的开始高度
+         */
+        MoverNode.prototype.handleUpAndDownMove = function (moveDistance, topNode, topNodeHeight, bottomNode, bottomNodeHeight, moveElement, cloneMoveElement, cloneMoveElementTop) {
+            // 上节点距离浏览器的距离
+            var topNodeTop = topNode.getBoundingClientRect().top;
+            // 如果开启了cloneNode属性 将移动节点复制一份用鼠标拖拽
+            if (this.cloneNode) {
+                // 复制节点距离浏览器的距离
+                var cloneNodeElementTop = cloneMoveElement.getBoundingClientRect().top;
+                // 控制复制节点的top属性
+                if (topNodeTop <= cloneNodeElementTop) {
+                    cloneMoveElement.style.top = cloneMoveElementTop + moveDistance + 'px';
+                }
+                else {
+                    // 如果超出运动距离 运动距离就是上节点的高度
+                    this.handleStopUpAndDownMove(-topNodeHeight, topNode, topNodeHeight, bottomNode, bottomNodeHeight, cloneMoveElement);
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                }
+            }
+            else {
+                // 运动节点距离浏览器的距离
+                var targetElementTop = moveElement.getBoundingClientRect().top;
+                topNode.style.height = topNodeHeight + moveDistance + 'px';
+                topNode.style.minHeight = topNodeHeight + moveDistance + 'px';
+                topNode.style.maxHeight = topNodeHeight + moveDistance + 'px';
+                if (topNodeTop < targetElementTop) {
+                    bottomNode.style.height = bottomNodeHeight - moveDistance + 'px';
+                    bottomNode.style.minHeight = bottomNodeHeight - moveDistance + 'px';
+                    bottomNode.style.maxHeight = bottomNodeHeight - moveDistance + 'px';
+                }
+            }
+        };
+        MoverNode.prototype.handleStopUpAndDownMove = function (moveDistance, topNode, topNodeHeight, bottomNode, bottomNodeHeight, cloneMoveElement) {
+            this.parantElement.removeChild(cloneMoveElement);
+            topNode.style.height = topNodeHeight + moveDistance + 'px';
+            topNode.style.minHeight = topNodeHeight + moveDistance + 'px';
+            topNode.style.maxHeight = topNodeHeight + moveDistance + 'px';
+            bottomNode.style.height = bottomNodeHeight - moveDistance + 'px';
+            bottomNode.style.minHeight = bottomNodeHeight - moveDistance + 'px';
+            bottomNode.style.maxHeight = bottomNodeHeight - moveDistance + 'px';
         };
         /**
          * 处理左右节点
          * @param event MouseEvent
          * @param eventTargetElement 运动节点 HTMLElement
          */
-        // private handleLeftAndRightNode(event: MouseEvent, eventTargetElement: HTMLElement): false {
-        //   // 开始距离
-        //   const startPositionX = event.clientX
-        //   // 上节点
-        //   const leftNode = document.querySelector(`.${this.leftNodeClass}`)! as HTMLElement
-        //   // 做节点宽度
-        //   const leftNodeOriginalWidth: number = leftNode.getBoundingClientRect().width
-        //   // 右节点
-        //   const rightNode = document.querySelector(`.${this.rightNodeClass}`)! as HTMLElement
-        //   // 右节点宽度
-        //   const rightNodeOriginalOffsetWidth: number = rightNode.offsetWidth
-        //   // 防抖函数
-        //   const debounceFunction = this.debounceFunction(this.handleLeftAndRightMousemove, this.time)
-        //   document.onmousemove = (e) => {
-        //     debounceFunction(
-        //       e,
-        //       startPositionX,
-        //       leftNode,
-        //       leftNodeOriginalWidth,
-        //       rightNode,
-        //       rightNodeOriginalOffsetWidth,
-        //       eventTargetElement
-        //     )
-        //   }
-        //   document.onmouseup = () => {
-        //     document.onmousemove = null
-        //     document.onmouseup = null
-        //   }
-        //   return false
-        // }
+        MoverNode.prototype.handleLeftAndRightNode = function (event, moveElement) {
+            var _this_1 = this;
+            // 移动节点的父节点
+            this.parantElement = moveElement.parentElement;
+            // 移动节点的父节点的 position
+            this.parantElementPosition = this.parantElement.style.position || 'static';
+            var moveElementLeft;
+            var cloneMoveElement;
+            var cloneMoveElementLeft;
+            if (this.cloneNode) {
+                // 将父节点的
+                this.parantElement.style.position = 'relative';
+                // 初始化的时候就进行 节点复制 避免多次无用复制
+                cloneMoveElement = moveElement.cloneNode(true);
+                cloneMoveElement.style.position = 'absolute';
+                cloneMoveElement.style.opacity = '0.5';
+                cloneMoveElement.style.width = moveElement.offsetWidth + 'px';
+                cloneMoveElement.style.height = moveElement.offsetHeight + 'px';
+                cloneMoveElement.style.top = moveElement.offsetTop + 'px';
+                cloneMoveElement.style.left = moveElement.offsetLeft + 'px';
+                cloneMoveElementLeft = cloneMoveElement.offsetLeft;
+                this.parantElement.appendChild(cloneMoveElement);
+            }
+            else {
+                moveElementLeft = moveElement.offsetLeft;
+            }
+            // 开始距离
+            var startPositionX = event.clientX;
+            // 上节点
+            var leftNode = document.querySelector("." + this.leftNodeClass);
+            // 做节点宽度
+            var leftNodeWidth = leftNode.offsetWidth;
+            // 右节点
+            var rightNode = document.querySelector("." + this.rightNodeClass);
+            // 右节点宽度
+            var rightNodeWidth = rightNode.offsetWidth;
+            // 防抖函数
+            var debounceFunction = this.debounceFunction(this.handleLeftAndRightMove, this.time);
+            document.onmousemove = function (e) {
+                var endPositionX = e.clientX;
+                // 鼠标运动轨迹
+                var moveDistance = endPositionX - startPositionX;
+                debounceFunction(moveDistance, leftNode, leftNodeWidth, rightNode, rightNodeWidth, moveElement, moveElementLeft, cloneMoveElement, cloneMoveElementLeft);
+            };
+            document.onmouseup = function (e) {
+                if (_this_1.cloneNode) {
+                    var endPositionX = e.clientX;
+                    // 鼠标运动轨迹
+                    var moveDistance = endPositionX - startPositionX;
+                    _this_1.handleStopLeftAndRightMove(moveDistance, leftNode, leftNodeWidth, rightNode, rightNodeWidth, cloneMoveElement);
+                }
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
+            return false;
+        };
+        /**
+         * @param e MouseEvent
+         * @param startPositionX 开始的x轴坐标
+         * @param leftNode 拖动区域的左侧节点
+         * @param leftNodeOriginalWidth 拖动区域的左侧节点的开始宽度
+         * @param rightNode 拖动区域的右侧节点
+         * @param rightNodeOriginalWidth 拖动区域的右侧节点的开始宽度
+         */
+        MoverNode.prototype.handleLeftAndRightMove = function (moveDistance, leftNode, leftNodeWidth, rightNode, rightNodeWidth, moveElement, _moveElementLeft, cloneMoveElement, cloneMoveElementLeft) {
+            // 获取父节点 的左边距离
+            var parantElementLeft = this.parantElement.getBoundingClientRect().left;
+            // 获取父节点 的右边距离
+            var parantElementRight = this.parantElement.getBoundingClientRect().right;
+            // 如果开启了cloneNode属性 将移动节点复制一份用鼠标拖拽
+            if (this.cloneNode) {
+                // 复制节点距离浏览器的距离
+                var cloneNodeElementLeft = cloneMoveElement.getBoundingClientRect().left;
+                var cloneNodeElementRight = cloneMoveElement.getBoundingClientRect().right;
+                if (parantElementLeft < cloneNodeElementLeft && parantElementRight >= cloneNodeElementRight) {
+                    cloneMoveElement.style.left = cloneMoveElementLeft + moveDistance + 'px';
+                }
+                else {
+                    // 超出范围且向左移动
+                    if (moveDistance < 0) {
+                        cloneMoveElement.style.left = 0 + 'px';
+                        leftNode.style.width = 0 + 'px';
+                        leftNode.style.minWidth = 0 + 'px';
+                        leftNode.style.maxWidth = 0 + 'px';
+                        rightNode.style.width =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        rightNode.style.minWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        rightNode.style.maxWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                    }
+                    else {
+                        // 超出范围且向右移动
+                        cloneMoveElement.style.right = 0 + 'px';
+                        rightNode.style.width = 0 + 'px';
+                        rightNode.style.minWidth = 0 + 'px';
+                        rightNode.style.maxWidth = 0 + 'px';
+                        leftNode.style.width =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        leftNode.style.minWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        leftNode.style.maxWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                    }
+                    this.parantElement.removeChild(cloneMoveElement);
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                }
+            }
+            else {
+                // 运动节点距离浏览器的距离
+                var moveElementLeft = moveElement.getBoundingClientRect().left;
+                var moveElementRight = moveElement.getBoundingClientRect().right;
+                if (parantElementLeft <= moveElementLeft && parantElementRight >= moveElementRight) {
+                    leftNode.style.width = leftNodeWidth + moveDistance + 'px';
+                    leftNode.style.minWidth = leftNodeWidth + moveDistance + 'px';
+                    leftNode.style.maxWidth = leftNodeWidth + moveDistance + 'px';
+                    rightNode.style.width = rightNodeWidth - moveDistance + 'px';
+                    rightNode.style.minWidth = rightNodeWidth - moveDistance + 'px';
+                    rightNode.style.maxWidth = rightNodeWidth - moveDistance + 'px';
+                }
+                else {
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                    if (moveDistance < 0) {
+                        leftNode.style.width = 0 + 'px';
+                        leftNode.style.minWidth = 0 + 'px';
+                        leftNode.style.maxWidth = 0 + 'px';
+                        rightNode.style.width =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        rightNode.style.minWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        rightNode.style.maxWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                    }
+                    else {
+                        console.log('xxxxxx');
+                        moveElement.style.right = 0 + 'px';
+                        rightNode.style.width = 0 + 'px';
+                        rightNode.style.minWidth = 0 + 'px';
+                        rightNode.style.maxWidth = 0 + 'px';
+                        leftNode.style.width =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        leftNode.style.minWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                        leftNode.style.maxWidth =
+                            this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
+                    }
+                }
+            }
+        };
+        MoverNode.prototype.handleStopLeftAndRightMove = function (moveDistance, leftNode, leftNodeWidth, rightNode, rightNodeWidth, cloneMoveElement) {
+            this.parantElement.removeChild(cloneMoveElement);
+            leftNode.style.width = leftNodeWidth + moveDistance + 'px';
+            leftNode.style.minWidth = leftNodeWidth + moveDistance + 'px';
+            leftNode.style.maxWidth = leftNodeWidth + moveDistance + 'px';
+            rightNode.style.width = rightNodeWidth - moveDistance + 'px';
+            rightNode.style.minWidth = rightNodeWidth - moveDistance + 'px';
+            rightNode.style.maxWidth = rightNodeWidth - moveDistance + 'px';
+        };
         /**
          * 处理单独节点
          * @param event MouseEvent
@@ -623,94 +780,6 @@
         //   }
         //   return false
         // }
-        /**
-         * @param e MouseEvent
-         * @param startPositionX 开始的x轴坐标
-         * @param leftNode 拖动区域的左侧节点
-         * @param leftNodeOriginalWidth 拖动区域的左侧节点的开始宽度
-         * @param rightNode 拖动区域的右侧节点
-         * @param rightNodeOriginalWidth 拖动区域的右侧节点的开始宽度
-         */
-        // private handleLeftAndRightMousemove(
-        //   e: MouseEvent,
-        //   startPositionX: number,
-        //   leftNode: HTMLElement,
-        //   leftNodeOriginalWidth: number,
-        //   rightNode: HTMLElement,
-        //   rightNodeOriginalOffsetWidth: number,
-        //   eventTargetElement: HTMLElement
-        // ) {
-        //   const endPositionX = e.clientX
-        //   // 鼠标运动轨迹
-        //   const moveDistance = endPositionX - startPositionX
-        //   if (leftNode && rightNode.offsetWidth) {
-        //     leftNode.style.overflow = 'hidden'
-        //     leftNode.style.width = leftNodeOriginalWidth + moveDistance + 'px'
-        //     leftNode.style.minWidth = leftNodeOriginalWidth + moveDistance + 'px'
-        //     leftNode.style.maxWidth = leftNodeOriginalWidth + moveDistance + 'px'
-        //   }
-        //   if (rightNode && leftNode.offsetWidth) {
-        //     rightNode.style.overflow = 'hidden'
-        //     rightNode.style.width = rightNodeOriginalOffsetWidth - moveDistance + 'px'
-        //     rightNode.style.minWidth = rightNodeOriginalOffsetWidth - moveDistance + 'px'
-        //     rightNode.style.maxWidth = rightNodeOriginalOffsetWidth - moveDistance + 'px'
-        //   }
-        // }
-        /**
-         * @param e MouseEvent
-         * @param topNode 拖动区域的上侧节点
-         * @param topNodeOriginalHeight 拖动区域的上侧节点的开始高度
-         * @param bottomNode 拖动区域的下侧节点
-         * @param bottomNodeOriginalHeight 拖动区域的下侧节点的开始高度
-         */
-        MoverNode.prototype.handleTopBottomMousemove = function (moveDistance, topNode, topNodeOriginalHeight, bottomNode, bottomNodeOriginalOffsetHeight, eventTargetElement, cloneNodeTopBottomElement, cloneNodeTopBottomElementOffSetTop) {
-            var topNodeTop = topNode.getBoundingClientRect().top;
-            // 如果开启了cloneNode属性 将移动节点复制一份用鼠标拖拽
-            if (this.cloneNode) {
-                // 如果启用了 cloneNode 属性
-                // 做碰撞判断
-                var cloneTargetElementTop = cloneNodeTopBottomElement.getBoundingClientRect().top;
-                if (topNodeTop < cloneTargetElementTop) {
-                    // 控制复制节点的top属性
-                    this.cloneNodeTopBottomElement.style.top =
-                        cloneNodeTopBottomElementOffSetTop + moveDistance + 'px';
-                }
-                else {
-                    console.log('超出临界点');
-                    topNode.style.height = topNodeOriginalHeight + moveDistance + 'px';
-                    topNode.style.minHeight = topNodeOriginalHeight + moveDistance + 'px';
-                    topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px';
-                    // 下节点
-                    bottomNode.style.height = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-                    bottomNode.style.minHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-                    bottomNode.style.maxHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-                    // 拖拽完成 将父节点的position 恢复原样
-                    this.parantElement.style.position = this.parantElementPosition;
-                    // 移除拖拽过程中的创建子节点
-                    this.parantElement.removeChild(this.cloneNodeTopBottomElement);
-                    // this.handleTopBottomMouseUp(
-                    //   moveDistance,
-                    //   topNode,
-                    //   topNodeOriginalHeight,
-                    //   bottomNode,
-                    //   bottomNodeOriginalOffsetHeight
-                    // )
-                    document.onmousemove = null;
-                    document.onmouseup = null;
-                }
-            }
-            else {
-                var targetElementTop = eventTargetElement.getBoundingClientRect().top;
-                topNode.style.height = topNodeOriginalHeight + moveDistance + 'px';
-                topNode.style.minHeight = topNodeOriginalHeight + moveDistance + 'px';
-                topNode.style.maxHeight = topNodeOriginalHeight + moveDistance + 'px';
-                if (topNodeTop < targetElementTop - 3) {
-                    bottomNode.style.height = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-                    bottomNode.style.minHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-                    bottomNode.style.maxHeight = bottomNodeOriginalOffsetHeight - moveDistance + 'px';
-                }
-            }
-        };
         /**
          * @param e MouseEvent
          * @param startPositionX X轴起点
@@ -792,7 +861,7 @@
         ], MoverNode.prototype, "bottomNodeClass", void 0);
         __decorate([
             Prop({
-                default: function () { return 3; },
+                default: function () { return 1; },
                 type: Number,
             })
         ], MoverNode.prototype, "time", void 0);
@@ -967,11 +1036,11 @@
       /* style */
       var __vue_inject_styles__ = function (inject) {
         if (!inject) { return }
-        inject("data-v-65228283_0", { source: ".mover-node[data-v-65228283] {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node[data-v-65228283] {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i[data-v-65228283] {\n  display: table-cell;\n  vertical-align: middle;\n}\n", map: {"version":3,"sources":["mover-node.vue"],"names":[],"mappings":"AAAA;EACE,kBAAkB;EAClB,mBAAmB;AACrB;AACA;EACE,cAAc;EACd,yBAAyB;EACzB,YAAY;EACZ,WAAW;EACX,kBAAkB;EAClB,kBAAkB;AACpB;AACA;EACE,mBAAmB;EACnB,sBAAsB;AACxB","file":"mover-node.vue","sourcesContent":[".mover-node {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i {\n  display: table-cell;\n  vertical-align: middle;\n}\n"]}, media: undefined });
+        inject("data-v-fa7a0c98_0", { source: ".mover-node[data-v-fa7a0c98] {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node[data-v-fa7a0c98] {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i[data-v-fa7a0c98] {\n  display: table-cell;\n  vertical-align: middle;\n}\n", map: {"version":3,"sources":["mover-node.vue"],"names":[],"mappings":"AAAA;EACE,kBAAkB;EAClB,mBAAmB;AACrB;AACA;EACE,cAAc;EACd,yBAAyB;EACzB,YAAY;EACZ,WAAW;EACX,kBAAkB;EAClB,kBAAkB;AACpB;AACA;EACE,mBAAmB;EACnB,sBAAsB;AACxB","file":"mover-node.vue","sourcesContent":[".mover-node {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i {\n  display: table-cell;\n  vertical-align: middle;\n}\n"]}, media: undefined });
 
       };
       /* scoped */
-      var __vue_scope_id__ = "data-v-65228283";
+      var __vue_scope_id__ = "data-v-fa7a0c98";
       /* module identifier */
       var __vue_module_identifier__ = undefined;
       /* functional template */
