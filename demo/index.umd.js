@@ -602,9 +602,9 @@
             var moveElementLeft;
             var cloneMoveElement;
             var cloneMoveElementLeft;
+            // 将父节点的定位改成 相对定位
+            this.parantElement.style.position = 'relative';
             if (this.cloneNode) {
-                // 将父节点的
-                this.parantElement.style.position = 'relative';
                 // 初始化的时候就进行 节点复制 避免多次无用复制
                 cloneMoveElement = moveElement.cloneNode(true);
                 cloneMoveElement.style.position = 'absolute';
@@ -667,7 +667,8 @@
                 // 复制节点距离浏览器的距离
                 var cloneNodeElementLeft = cloneMoveElement.getBoundingClientRect().left;
                 var cloneNodeElementRight = cloneMoveElement.getBoundingClientRect().right;
-                if (parantElementLeft < cloneNodeElementLeft && parantElementRight >= cloneNodeElementRight) {
+                if (parantElementLeft <= cloneNodeElementLeft &&
+                    parantElementRight >= cloneNodeElementRight) {
                     cloneMoveElement.style.left = cloneMoveElementLeft + moveDistance + 'px';
                 }
                 else {
@@ -707,12 +708,7 @@
                 var moveElementLeft = moveElement.getBoundingClientRect().left;
                 var moveElementRight = moveElement.getBoundingClientRect().right;
                 if (parantElementLeft <= moveElementLeft && parantElementRight >= moveElementRight) {
-                    leftNode.style.width = leftNodeWidth + moveDistance + 'px';
-                    leftNode.style.minWidth = leftNodeWidth + moveDistance + 'px';
-                    leftNode.style.maxWidth = leftNodeWidth + moveDistance + 'px';
-                    rightNode.style.width = rightNodeWidth - moveDistance + 'px';
-                    rightNode.style.minWidth = rightNodeWidth - moveDistance + 'px';
-                    rightNode.style.maxWidth = rightNodeWidth - moveDistance + 'px';
+                    moveElement.style.left = _moveElementLeft + moveDistance + 'px';
                 }
                 else {
                     document.onmousemove = null;
@@ -729,7 +725,6 @@
                             this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px';
                     }
                     else {
-                        console.log('xxxxxx');
                         moveElement.style.right = 0 + 'px';
                         rightNode.style.width = 0 + 'px';
                         rightNode.style.minWidth = 0 + 'px';
@@ -1036,11 +1031,11 @@
       /* style */
       var __vue_inject_styles__ = function (inject) {
         if (!inject) { return }
-        inject("data-v-fa7a0c98_0", { source: ".mover-node[data-v-fa7a0c98] {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node[data-v-fa7a0c98] {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i[data-v-fa7a0c98] {\n  display: table-cell;\n  vertical-align: middle;\n}\n", map: {"version":3,"sources":["mover-node.vue"],"names":[],"mappings":"AAAA;EACE,kBAAkB;EAClB,mBAAmB;AACrB;AACA;EACE,cAAc;EACd,yBAAyB;EACzB,YAAY;EACZ,WAAW;EACX,kBAAkB;EAClB,kBAAkB;AACpB;AACA;EACE,mBAAmB;EACnB,sBAAsB;AACxB","file":"mover-node.vue","sourcesContent":[".mover-node {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i {\n  display: table-cell;\n  vertical-align: middle;\n}\n"]}, media: undefined });
+        inject("data-v-af31bb7c_0", { source: ".mover-node[data-v-af31bb7c] {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node[data-v-af31bb7c] {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i[data-v-af31bb7c] {\n  display: table-cell;\n  vertical-align: middle;\n}\n", map: {"version":3,"sources":["mover-node.vue"],"names":[],"mappings":"AAAA;EACE,kBAAkB;EAClB,mBAAmB;AACrB;AACA;EACE,cAAc;EACd,yBAAyB;EACzB,YAAY;EACZ,WAAW;EACX,kBAAkB;EAClB,kBAAkB;AACpB;AACA;EACE,mBAAmB;EACnB,sBAAsB;AACxB","file":"mover-node.vue","sourcesContent":[".mover-node {\n  position: relative;\n  background: #909399;\n}\n.mover-node .default-mover-node {\n  display: table;\n  background-color: #909399;\n  height: 100%;\n  width: 20px;\n  border-radius: 4px;\n  text-align: center;\n}\n.mover-node .default-mover-node i {\n  display: table-cell;\n  vertical-align: middle;\n}\n"]}, media: undefined });
 
       };
       /* scoped */
-      var __vue_scope_id__ = "data-v-fa7a0c98";
+      var __vue_scope_id__ = "data-v-af31bb7c";
       /* module identifier */
       var __vue_module_identifier__ = undefined;
       /* functional template */

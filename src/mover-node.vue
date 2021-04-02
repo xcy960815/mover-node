@@ -267,9 +267,9 @@ export default class MoverNode extends Vue {
     let moveElementLeft: number
     let cloneMoveElement!: HTMLElement
     let cloneMoveElementLeft: number
+    // 将父节点的定位改成 相对定位
+    this.parantElement.style.position = 'relative'
     if (this.cloneNode) {
-      // 将父节点的
-      this.parantElement.style.position = 'relative'
       // 初始化的时候就进行 节点复制 避免多次无用复制
       cloneMoveElement = moveElement.cloneNode(true)! as HTMLElement
       cloneMoveElement.style.position = 'absolute'
@@ -361,7 +361,10 @@ export default class MoverNode extends Vue {
       // 复制节点距离浏览器的距离
       const cloneNodeElementLeft: number = cloneMoveElement.getBoundingClientRect().left
       const cloneNodeElementRight: number = cloneMoveElement.getBoundingClientRect().right
-      if (parantElementLeft < cloneNodeElementLeft && parantElementRight >= cloneNodeElementRight) {
+      if (
+        parantElementLeft <= cloneNodeElementLeft &&
+        parantElementRight >= cloneNodeElementRight
+      ) {
         cloneMoveElement.style.left = cloneMoveElementLeft + moveDistance + 'px'
       } else {
         // 超出范围且向左移动
@@ -398,12 +401,7 @@ export default class MoverNode extends Vue {
       const moveElementLeft: number = moveElement.getBoundingClientRect().left
       const moveElementRight: number = moveElement.getBoundingClientRect().right
       if (parantElementLeft <= moveElementLeft && parantElementRight >= moveElementRight) {
-        leftNode.style.width = leftNodeWidth + moveDistance + 'px'
-        leftNode.style.minWidth = leftNodeWidth + moveDistance + 'px'
-        leftNode.style.maxWidth = leftNodeWidth + moveDistance + 'px'
-        rightNode.style.width = rightNodeWidth - moveDistance + 'px'
-        rightNode.style.minWidth = rightNodeWidth - moveDistance + 'px'
-        rightNode.style.maxWidth = rightNodeWidth - moveDistance + 'px'
+        moveElement.style.left = _moveElementLeft + moveDistance + 'px'
       } else {
         document.onmousemove = null
         document.onmouseup = null
@@ -418,7 +416,6 @@ export default class MoverNode extends Vue {
           rightNode.style.maxWidth =
             this.parantElement.getBoundingClientRect().width - moveElement.offsetWidth + 'px'
         } else {
-          console.log('xxxxxx')
           moveElement.style.right = 0 + 'px'
           rightNode.style.width = 0 + 'px'
           rightNode.style.minWidth = 0 + 'px'
